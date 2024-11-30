@@ -5,7 +5,7 @@ info:
   description: API combinée pour la gestion des produits, des utilisateurs et des sessions.
   x-fiddle-import-file: true
 servers:
-  - url: http://188.165.44.138:9000
+  - url: http://sso.inoctet.fr
     description: SSO Server
 paths:
   /ping:
