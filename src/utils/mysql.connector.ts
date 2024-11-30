@@ -1,8 +1,10 @@
 import {knex} from "knex";
 
-let mysqlDB;
+// assign knex to mysqlDB just for default value btw it's overwritten in initConnection
+let mysqlDB = knex;
 
 async function initConnection() {
+    // @ts-ignore
     mysqlDB = knex({
         client: 'mysql',
         connection: {

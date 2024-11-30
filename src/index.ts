@@ -8,9 +8,9 @@
 import {configDotenv} from "dotenv";
 import Fastify, { FastifyInstance } from 'fastify'
 
-import fastifyEndpoints from "./src/endpoints";
-import mysqlConnector from "./src/utils/mysql.connector";
-import responseHandler from "./src/middlewares/responseHandler.handler";
+import fastifyEndpoints from "./endpoints";
+import mysqlConnector from "./utils/mysql.connector";
+import responseHandler from "./middlewares/responseHandler.handler";
 
 let isProduction: boolean = false;
 const server: FastifyInstance = Fastify({
