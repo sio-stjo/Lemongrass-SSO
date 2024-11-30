@@ -1,0 +1,606 @@
+openapi: 3.1.0
+info:
+  title: Combined API
+  version: 1.0.0
+  description: API combinée pour la gestion des produits, des utilisateurs et des sessions.
+  x-fiddle-import-file: true
+servers:
+  - url: http://188.165.44.138:9000
+    description: SSO Server
+paths:
+  /ping:
+    get:
+      summary: Ping
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: PingOk
+                properties:
+                  data:
+                    type: object
+                    example: {}
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: pong
+          description: Réponse réussie
+      description: Vérifie si le serveur est actif.
+      operationId: ping
+  /admin/user:
+    get:
+      tags:
+        - sso
+      summary: Get User
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: GetUserOk
+                required:
+                  - data
+                  - status
+                  - message
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: pong
+          description: Réponse réussie
+      parameters:
+        - in: query
+          name: userID
+          style: form
+          schema:
+            type: integer
+          explode: true
+          required: true
+          description: ID de l'utilisateur
+          allowReserved: false
+        - $ref: "#/components/parameters/token"
+      description: Renvoie les infos complètes d'un user
+      operationId: getUser
+  /auth/setup:
+    get:
+      tags:
+        - sso
+      summary: Check Setup Token
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CheckSetupTokenOk
+                required:
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: object
+                    example: {}
+                    required:
+                      - nale
+                      - classID
+                      - name
+                    properties:
+                      name:
+                        type: string
+                      classID:
+                        type: string
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Token is valid
+          description: Réponse réussie
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CheckSetupTokenBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid token
+          description: Erreur de requête
+      parameters:
+        - in: query
+          name: token
+          style: form
+          schema:
+            type: string
+          explode: true
+          required: true
+          description: The setup token to check
+          allowReserved: false
+      description: Vérification du token de SETUP
+      operationId: checkSetupToken
+    put:
+      tags:
+        - sso
+      summary: Create User
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CreateStudentAccountOk
+                required:
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: object
+                    example: {}
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully
+          description: Utilisateur créé avec succès
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CreateStudentAccountBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid request parameters
+          description: Erreur de requête
+      parameters:
+        - $ref: "#/components/parameters/token"
+        - in: query
+          name: classID
+          style: form
+          schema:
+            type: integer
+          explode: true
+          required: true
+          description: ID de la classe
+          allowReserved: false
+        - in: query
+          name: name
+          style: form
+          schema:
+            type: string
+          explode: true
+          required: true
+          description: Nom de l'utilisateur
+          allowReserved: false
+      description: Les administrateurs peuvent créer un compte utilisateur.
+      operationId: createUser
+    patch:
+      tags:
+        - sso
+      summary: Setup Account
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: StudentAccountSetupOk
+                required:
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: object
+                    example: {}
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Account setup successful
+          description: Compte configuré avec succès
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: StudentAccountSetupBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid request parameters
+          description: Erreur de requête
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+          description: Email de l'utilisateur
+        - in: query
+          name: password
+          schema:
+            type: string
+          required: true
+          description: Mot de passe de l'utilisateur
+        - $ref: "#/components/parameters/token"
+      description: Les étudiants peuvent configurer leur compte.
+      operationId: setupAccount
+  /admin/class:
+    get:
+      tags:
+        - sso
+      summary: Get Classes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListClassesOk
+                required:
+                  - data
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Class"
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: pong
+          description: Réponse réussie
+      parameters:
+        - $ref: "#/components/parameters/token"
+      description: Liste les classes
+      operationId: getClasses
+  /auth/session:
+    get:
+      tags:
+        - sso
+      summary: Check Token
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CheckAccessTokenOk
+                required:
+                  - message
+                  - status
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Access token is valid
+          description: Token valide
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CheckAccessTokenBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid token
+          description: Erreur de requête
+      parameters:
+        - $ref: "#/components/parameters/token"
+        - in: query
+          name: extra
+          style: form
+          schema:
+            type: boolean
+          explode: true
+          required: true
+          description: Should include user infos
+          allowReserved: false
+      description: Vérification du token d'accès
+      operationId: checkToken
+    post:
+      tags:
+        - sso
+      summary: Create User Session
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CreateUserSessionOk
+                required:
+                  - data
+                  - status
+                  - message
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - expiresInStamp
+                      - refresh_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: ""
+                      refresh_token:
+                        type: string
+                        example: ""
+                      expiresInStamp:
+                        type: integer
+                        example: 0
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Session created successfully
+          description: Session créée avec succès
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: CreateUserSessionBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid email or password
+          description: Erreur de requête
+      parameters: []
+      description: Crée une session utilisateur avec un token d'accès et un refresh token.
+      operationId: createUserSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  description: Email de l'utilisateur
+                password:
+                  type: string
+                  description: Mot de passe de l'utilisateur
+        required: true
+    patch:
+      tags:
+        - sso
+      summary: Refresh Token
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: RefreshAccessTokenOk
+                required:
+                  - data
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                      - expiresInStamp
+                      - refresh_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: ""
+                      refresh_token:
+                        type: string
+                        example: ""
+                      expiresInStamp:
+                        type: integer
+                        example: 0
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Access token refreshed successfully
+          description: Token rafraîchi avec succès
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: RefreshAccessTokenBadRequest
+                properties:
+                  data:
+                    type: "null"
+                    example: null
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid request parameters
+          description: Erreur de requête
+      parameters:
+        - in: query
+          name: access_token
+          schema:
+            type: string
+          required: true
+          description: Token d'accès actuel
+        - in: query
+          name: refresh_token
+          schema:
+            type: string
+          required: true
+          description: Token de rafraîchissement
+        - in: query
+          name: expires_in
+          schema:
+            type: integer
+          required: true
+          description: Timestamp d'expiration
+      description: Rafraîchit le token d'accès avec un nouveau token et timestamp
+        d'expiration.
+      operationId: refreshToken
+  /admin/accounts:
+    get:
+      tags:
+        - sso
+      summary: Get Accounts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                title: GetAccountsOk
+                required:
+                  - data
+                  - message
+                  - status
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - ID
+                        - className
+                        - name
+                        - typeAccount
+                      properties:
+                        ID:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: coucou
+                        className:
+                          type: string
+                          example: SIO
+                        typeAccount:
+                          type: integer
+                          example: 1
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: pong
+          description: Réponse réussie
+      parameters:
+        - $ref: "#/components/parameters/token"
+      description: Liste les comptes utilisateurs
+      operationId: getAccounts
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - ID
+        - authorizations
+        - class
+        - name
+        - IDUser
+        - authorisations
+        - autorisations
+        - authorizations
+        - authorization
+        - classID
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        IDUser:
+          type: integer
+        classID:
+          type: string
+        onBoarding:
+          type: boolean
+        validatedAt:
+          type: string
+        startupToken:
+          type: string
+        authorization:
+          type: array
+          items:
+            type: string
+    Class:
+      type: object
+      required:
+        - classID
+        - name
+        - ID
+      properties:
+        ID:
+          type: integer
+        name:
+          type: string
+  parameters:
+    token:
+      in: query
+      name: token
+      style: form
+      schema:
+        type: string
+      explode: true
+      description: Access Token of the user
+      allowReserved: false
+      allowEmptyValue: true
+tags:
+  - name: sso
