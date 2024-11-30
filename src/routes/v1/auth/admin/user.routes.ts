@@ -17,15 +17,15 @@ class AuthAccountSetup {
         }
 
         const userData = await AuthSessionUtils.getUserByToken(parsedQuery.token);
-        if (!userData || !userData.autorisations) {
+        if (!userData || !userData.authorization) {
             return responseHandlerHandler.handleErrorResponse(response, 'Invalid token');
         }
 
-        if (!userData.autorisations.includes('lemongrass.cupcake.admin')) {
+        if (!userData.authorization.includes('lemongrass.cupcake.admin')) {
             return responseHandlerHandler.handleErrorResponse(response, 'Unauthorized');
         }
 
-        const userInfos = await authSessionUtils.getUserInfos(parsedQuery.userID);
+        const userInfos = await authSessionUtils.getUserByID(parsedQuery.userID);
 
         responseHandlerHandler.handleSuccessMessage(response, 'Method Allowed', userInfos);
     }

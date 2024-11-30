@@ -71,7 +71,7 @@ class AuthSessionUtils {
         const dataReturn = {
             IDUser: userData.IDUser,
             name: decryptedName,
-            autorisations: parsedAutorisations
+            authorization: parsedAutorisations
         };
 
         if (extra == "true") {
@@ -142,7 +142,7 @@ class AuthSessionUtils {
         return await mysqlConnector.mysqlDB('sso_class').select(['ID', 'name']);
     }
 
-    async getUserInfos(userID: string) {
+    async getUserByID(userID: string) {
         const users = await mysqlConnector.mysqlDB('sso_users').select(['sso_users.ID as ID', 'startupToken', 'sso_users.name as name_user', 'email', 'sso_class.name as class_name', 'validatedAt', 'encryptPartialKey', 'autorisations', 'startupToken']).join('sso_class', 'sso_users.classID', 'sso_class.ID')
             .where({
                 'sso_users.ID': userID
@@ -163,12 +163,12 @@ class AuthSessionUtils {
         }
 
         const userData = {
-            ID: users.ID,
+            IDUser: users.ID,
             name: nameDecrypted,
             email: emailDecrypted,
-            class: users.class_name,
+            classID: users.class_name,
             validatedAt: users.validatedAt,
-            autorisations: userAutorisations,
+            authorization: userAutorisations,
             onBoarding: (users.startupToken === ''),
             startupToken: users.startupToken || ''
         };

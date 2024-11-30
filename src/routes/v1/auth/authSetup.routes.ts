@@ -28,7 +28,7 @@ class AuthSetup {
             return responseHandlerHandler.handleErrorResponse(response, 'Invalid token');
         }
 
-        responseHandlerHandler.handleSuccessMessage(response, 'setup', {});
+        responseHandlerHandler.handleSuccessMessage(response, 'setup', userData);
     }
 
     public async patch(request: FastifyRequest, response: FastifyReply) {
@@ -71,11 +71,11 @@ class AuthSetup {
 
         const userData = await AuthSessionUtils.getUserByToken(parsedQuery.token);
 
-        if (!userData || !userData.autorisations) {
+        if (!userData || !userData.authorization) {
             return responseHandlerHandler.handleErrorResponse(response, 'Invalid token');
         }
 
-        if (!userData.autorisations.includes('lemongrass.cupcake.admin')) {
+        if (!userData.authorization.includes('lemongrass.cupcake.admin')) {
             return responseHandlerHandler.handleErrorResponse(response, 'Unauthorized');
         }
 

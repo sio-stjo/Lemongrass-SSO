@@ -3,11 +3,23 @@ import secretsManagerUtils from "../secretsManager.utils";
 
 class AuthSetupUtils {
     public async getUserByStartupToken(startupToken: string) {
-        const userData = await mysqlConnector.mysqlDB('sso_users').select(['name', 'encryptPartialKey']).where({
+        const userData = await mysqlConnector.mysqlDB('sso_users').select(['sso_users.name as user_name', 'sso_class.name as className', 'encryptPartialKey']).where({
             startupToken
-        }).limit(1).first();
+        }).join('sso_class', 'sso_users.classID', 'sso_class.ID').limit(1).first();
 
-        return !!userData;
+        let decryptedName;
+
+        try {
+            decryptedName = await secretsManagerUtils.decryptData(userData.user_name, userData.encryptPartialKey);
+        }
+        catch {
+            return false;
+        }
+
+        return {
+            name: decryptedName,
+            classID: userData.className,
+        };
     }
 
     public async registerUser(startupToken: string, email: string, hashPassword: string, emailHash: string) {
